@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Games - Arcade Hub</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: radial-gradient(circle, #0f172a 0%, #020617 100%); color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); padding: 20px; border-radius: 20px; width: 460px; box-shadow: 0 20px 40px rgba(0,0,0,0.8); border: 1px solid rgba(56, 189, 248, 0.4); box-sizing: border-box; position: relative; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #020617; border: 1px solid #334155; color: #fff; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); border: none; color: white; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 8px; transition: 0.2s; font-size: 14px; box-shadow: 0 4px 12px rgba(2,132,199,0.3); }
+        button:hover { opacity: 0.95; transform: translateY(-2px); }
+        .hidden { display: none !important; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 15px; }
+        .coins { background: #1e293b; padding: 6px 14px; border-radius: 20px; color: #f59e0b; font-weight: bold; font-size: 15px; border: 1px solid rgba(245, 158, 11, 0.3); box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        
+        .timer-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; padding: 12px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; box-shadow: 0 6px 14px rgba(0,0,0,0.4); }
+        
+        .color-btns { display: flex; gap: 10px; margin-bottom: 12px; }
+        .col-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; color: #fff; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: 0.2s; }
+        .btn-green { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .btn-violet { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); }
+        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+        .number-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; background: #020617; padding: 10px; border-radius: 12px; border: 1px solid #1e293b; }
+        .num-ball { width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; margin: 0 auto; color: #fff; font-size: 14px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+        
+        .size-btns { display: flex; gap: 10px; margin-bottom: 12px; }
+        .size-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .btn-big { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+        .btn-small { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+
+        .multiplier-bar { display: flex; gap: 4px; margin-bottom: 12px; background: #020617; padding: 6px; border-radius: 10px; border: 1px solid #1e293b; }
+        .mult-btn { flex: 1; background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 0; border-radius: 6px; font-size: 11px; cursor: pointer; text-align: center; font-weight: bold; }
+        .mult-btn.active { background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); border-color: #38bdf8; color: #fff; }
+
+        .history-table { margin-top: 8px; background: #020617; padding: 8px; border-radius: 10px; font-size: 12px; max-height: 100px; overflow-y: auto; border: 1px solid #1e293b; }
+        .history-row { display: flex; justify-content: space-between; padding: 5px 6px; border-bottom: 1px solid #1e293b; align-items: center; }
+        
+        .lobby-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .lobby-card { background: #020617; border: 1px solid #334155; padding: 15px; border-radius: 14px; text-align: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+        .lobby-card:hover { border-color: #38bdf8; transform: translateY(-3px); background: #0f172a; }
+        .lobby-card h4 { margin: 8px 0 0 0; color: #38bdf8; font-size: 15px; }
+
+        .admin-panel { margin-top: 15px; background: #1e293b; padding: 12px; border-radius: 12px; border: 1px solid #f59e0b; max-height: 140px; overflow-y: auto; }
+        .modal { background: #020617; border: 1px solid #38bdf8; padding: 15px; border-radius: 12px; margin-bottom: 12px; text-align: center; }
+
+        #popupOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .popup-box { background: #1e293b; border: 2px solid #38bdf8; padding: 25px; border-radius: 20px; text-align: center; width: 300px; box-shadow: 0 0 30px rgba(56,189,248,0.5); animation: popAnim 0.3s ease; }
+        @keyframes popAnim { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div id="popupOverlay" class="hidden">
+    <div class="popup-box" id="popupBoxContent">
+        <div id="popupEmoji" style="font-size: 50px; margin-bottom: 10px;">🎉</div>
+        <h2 id="popupTitle" style="margin: 0 0 10px 0; color: #38bdf8;">You Won!</h2>
+        <p id="popupDesc" style="color: #94a3b8; font-size: 14px; margin-bottom: 15px;">+₹200 added to your wallet</p>
+        <button onclick="closePopup()" style="background: #16a34a; padding: 10px;">Awesome!</button>
+    </div>
+</div>
+
+<div class="card" id="authCard">
+    <h2 style="text-align: center; margin-top: 0; color: #38bdf8; font-size: 24px;" id="authTitle">🎮 Delhi Games</h2>
+    <input type="text" id="username" placeholder="Username (use 'admin' / 'admin')">
+    <input type="password" id="password" placeholder="Password">
+    
+    <div id="otpContainer" class="hidden">
+        <input type="text" id="otpInput" placeholder="Enter 4-Digit OTP">
+    </div>
+
+    <button onclick="handleAuth()" id="authBtn">Login</button>
+    <p style="text-align: center; cursor: pointer; color: #94a3b8; font-size: 13px; margin-top: 15px;" onclick="toggleMode()" id="switchText">Don't have an account? Register</p>
+</div>
+
+<div class="card hidden" id="gameCard" style="width: 460px;">
+    <div class="header">
+        <h3 style="margin:0; font-size: 16px;">Hi, <span id="userDisplay" style="color: #38bdf8;"></span></h3>
+        <div class="coins">🪙 ₹<span id="userCoins">0</span></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px;">
+        <button style="margin:0; background: #16a34a; font-size: 10px; padding: 6px;" onclick="claimDailyBonus()">🎁 ₹500 Daily</button>
+        <button style="margin:0; background: #9333ea; font-size: 10px; padding: 6px;" onclick="openShareModal()">🔗 Share</button>
+        <button style="margin:0; background: #0284c7; font-size: 10px; padding: 6px;" onclick="openDeposit()">💰 Deposit</button>
+        <button style="margin:0; background: #d97706; font-size: 10px; padding: 6px;" onclick="addMember()">🤖 Mascot</button>
+    </div>
+
+    <button style="background: linear-gradient(135deg, #334155 0%, #1e293b 100%); margin-bottom: 12px; font-size: 12px; padding: 8px;" onclick="showLobby()">🏠 Main Lobby</button>
+
+    <div class="active-game-area" id="gameArea"></div>
+
+    <div id="adminSection" class="hidden admin-panel">
+        <h4 style="margin:0 0 6px 0; color: #f59e0b; font-size: 13px;">🛠️ Admin Dashboard</h4>
+        <div id="adminUserList" style="font-size: 11px; margin-bottom: 6px; max-height: 45px; overflow-y: auto; background: #0f172a; padding: 4px; border-radius: 4px;">Loading users...</div>
+        <input type="text" id="targetUser" placeholder="Target Username" style="padding: 5px; font-size: 11px;">
+        <input type="number" id="newCoinVal" placeholder="New ₹ Balance" style="padding: 5px; font-size: 11px;">
+        <button style="background: #d97706; padding: 6px; font-size: 11px;" onclick="adminUpdateCoins()">Update Balance</button>
+    </div>
+
+    <h4 style="margin: 10px 0 4px 0; font-size: 12px; color: #94a3b8;">🏆 Live Leaderboard (Active Bots)</h4>
+    <div class="leaderboard" id="leaderboardList">
+        <div class="lb-item"><span>Loading...</span></div>
+    </div>
+</div>
+
+<script>
+    let isRegister = false;
+    let isWaitingForOtp = false;
+    let currentUser = null;
+    let selectedMultiplier = 1;
+    let gameHistoryList = [];
+
+    let botPlayers = [
+        { username: 'Rohan_99', coins: 14200 },
+        { username: 'DelhiKing_7', coins: 28500 },
+        { username: 'Priya_Win', coins: 9400 },
+        { username: 'Aman_Gambler', coins: 31000 },
+        { username: 'Lucky_Rahul', coins: 18900 }
+    ];
+
+    function playBeep(isWin) {
+        try {
+            let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = isWin ? 'triangle' : 'sawtooth';
+            osc.frequency.setValueAtTime(isWin ? 587.33 : 220, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        } catch(e) {}
+    }
+
+    function showPopup(isWin, title, desc) {
+        playBeep(isWin);
+        document.getElementById('popupEmoji').innerText = isWin ? '🥳🎉' : '😢💔';
+        document.getElementById('popupTitle').innerText = title;
+        document.getElementById('popupTitle').style.color = isWin ? '#22c55e' : '#ef4444';
+        document.getElementById('popupDesc').innerText = desc;
+        document.getElementById('popupOverlay').classList.remove('hidden');
+    }
+
+    function closePopup() {
+        document.getElementById('popupOverlay').classList.add('hidden');
+    }
+
+    function toggleMode() {
+        isRegister = !isRegister;
+        isWaitingForOtp = false;
+        document.getElementById('otpContainer').classList.add('hidden');
+        document.getElementById('authTitle').innerText = isRegister ? 'Delhi Games Register' : 'Delhi Games Login';
+        document.getElementById('authBtn').innerText = isRegister ? 'Get OTP & Register' : 'Login';
+        document.getElementById('switchText').innerText = isRegister ? 'Already have an account? Login' : "Don't have an account? Register";
+    }
+
+    async function handleAuth() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if(isRegister && !isWaitingForOtp) {
+            const res = await fetch('/api/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert(data.message);
+                isWaitingForOtp = true;
+                document.getElementById('otpContainer').classList.remove('hidden');
+                document.getElementById('authBtn').innerText = 'Verify & Complete Registration';
+            } else {
+                alert(data.message);
+            }
+            return;
+        }
+
+        if(isRegister && isWaitingForOtp) {
+            const otp = document.getElementById('otpInput').value;
+            const res = await fetch('/api/verify-register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, otp })
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert('Registration verified successfully! Please login.');
+                toggleMode();
+            } else {
+                alert(data.message);
+            }
+            return;
+        }
+
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            currentUser = data.user;
+            document.getElementById('userDisplay').innerText = currentUser.username;
+            document.getElementById('userCoins').innerText = currentUser.coins;
+            document.getElementById('authCard').classList.add('hidden');
+            document.getElementById('gameCard').classList.remove('hidden');
+
+            if(currentUser.isAdmin) {
+                document.getElementById('adminSection').classList.remove('hidden');
+                fetchAdminUsers();
+            }
+            fetchLeaderboard();
+            showLobby();
+            startBotActivity();
+        } else {
+            alert(data.message);
+        }
+    }
+
+    async function modifyCoins(amount) {
+        const res = await fetch('/api/update-coins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: currentUser.username, amount })
+        });
+        const data = await res.json();
+        if(data.success) {
+            currentUser.coins = data.coins;
+            document.getElementById('userCoins').innerText = currentUser.coins;
+            fetchLeaderboard();
+        }
+    }
+
+    async function claimDailyBonus() {
+        await modifyCoins(500);
+        showPopup(true, "Daily Bonus Claimed!", "+₹500 added to your wallet successfully!");
+    }
+
+    function openShareModal() {
+        let refLink = `http://localhost:3000/?ref=${currentUser.username}`;
+        const area = document.getElementById('gameArea');
+        area.innerHTML = `
+            <div class="modal">
+                <h3 style="margin-top:0; color: #38bdf8;">🔗 Share & Earn ₹500</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">Share your referral link on social media:</p>
+                <input type="text" value="${refLink}" id="refInput" readonly style="font-size: 11px; text-align: center;">
+                <button style="background: #2563eb; padding: 10px;" onclick="navigator.clipboard.writeText('${refLink}'); alert('Link Copied!');">Copy Link</button>
+                
+                <div style="display: flex; gap: 6px; margin-top: 10px;">
+                    <a href="https://api.whatsapp.com/send?text=Play%20exciting%20games%20on%20Delhi%20Games!%20Join%20now:%20${encodeURIComponent(refLink)}" target="_blank" style="flex:1; background: #25D366; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; display:inline-block;">💬 WhatsApp</a>
+                    
+                    <a href="https://t.me/share/url?url=${encodeURIComponent(refLink)}&text=Play%20on%20Delhi%20Games!" target="_blank" style="flex:1; background: #0088cc; color:#fff; padding:8px; border-radius:6px; text-decoration:none; font-size:12px; font-weight:bold; display:inline-block;">✈️ Telegram</a>
+                </div>
+                <button style="background: #334155; padding: 8px; margin-top: 8px;" onclick="showLobby()">Back to Lobby</button>
+            </div>
+        `;
+    }
+
+    function addMember() {
+        showPopup(true, "Mascot Companion 🤖", "Ninja Mascot active! Ready to boost your game luck.");
+    }
+
+    function openDeposit() {
+        const area = document.getElementById('gameArea');
+        area.innerHTML = `
+            <div class="modal">
+                <h3 style="margin-top:0; color: #38bdf8;">💰 Paytm UPI Deposit</h3>
+                <p style="font-size: 12px; color: #94a3b8; margin: 5px 0;">Scan QR or pay to <b>rexrages@ptyes</b></p>
+                <div style="background: #fff; padding: 10px; display: inline-block; border-radius: 8px; margin: 8px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=upi://pay?pa=rexrages@ptyes&pn=RaghvendraDwivedi" alt="Paytm QR">
+                </div>
+                <div style="background: #0f172a; padding: 8px; border-radius: 6px; font-weight: bold; color: #f59e0b; margin-bottom: 8px; font-size: 13px;">
+                    UPI ID: rexrages@ptyes
+                </div>
+                <input type="text" id="utrInput" placeholder="Enter 12-Digit UTR / Ref Number" style="padding: 8px; font-size: 12px;">
+                <input type="number" id="depAmount" placeholder="Amount Paid (₹)" style="padding: 8px; font-size: 12px;">
+                <button style="background: #16a34a; padding: 10px;" onclick="verifyDeposit()">Submit & Add Balance</button>
+                <button style="background: #334155; padding: 8px; margin-top: 5px;" onclick="showLobby()">Back to Lobby</button>
+            </div>
+        `;
+    }
+
+    function verifyDeposit() {
+        let amt = parseInt(document.getElementById('depAmount').value);
+        let utr = document.getElementById('utrInput').value;
+        if(!utr || !amt) { alert('Please enter valid UTR and amount!'); return; }
+        
+        modifyCoins(amt);
+        showPopup(true, "Deposit Successful!", `₹${amt} credited via rexrages@ptyes!`);
+        showLobby();
+    }
+
+    async function fetchLeaderboard() {
+        const res = await fetch('/api/leaderboard');
+        let list = await res.json();
+        botPlayers.forEach(b => list.push(b));
+        list.sort((a, b) => b.coins - a.coins);
+
+        let html = '';
+        list.forEach((u, i) => {
+            html += `<div class="lb-item"><span>${i+1}. ${u.username}</span> <b>₹${u.coins}</b></div>`;
+        });
+        document.getElementById('leaderboardList').innerHTML = html;
+    }
+
+    function startBotActivity() {
+        setInterval(() => {
+            let randomBot = botPlayers[Math.floor(Math.random() * botPlayers.length)];
+            let change = (Math.random() > 0.4 ? 1 : -1) * Math.floor(Math.random() * 400);
+            randomBot.coins += change;
+            if(randomBot.coins < 1000) randomBot.coins = 5000;
+            fetchLeaderboard();
+        }, 5000);
+    }
+
+    async function fetchAdminUsers() {
+        const res = await fetch('/api/admin/users');
+        const list = await res.json();
+        let html = '';
+        list.forEach(u => {
+            html += `<div>👤 <b>${u.username}</b> - ₹${u.coins} ${u.isAdmin ? '(Admin)' : ''}</div>`;
+        });
+        document.getElementById('adminUserList').innerHTML = html;
+    }
+
+    async function adminUpdateCoins() {
+        const targetUser = document.getElementById('targetUser').value;
+        const newCoinVal = document.getElementById('newCoinVal').value;
+
+        const res = await fetch('/api/admin/modify-coins', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: targetUser, coins: newCoinVal })
+        });
+        const data = await res.json();
+        alert(data.message);
+        fetchAdminUsers();
+        fetchLeaderboard();
+    }
+
+    function showLobby() {
+        const area = document.getElementById('gameArea');
+        area.innerHTML = `
+            <div style="text-align: center; margin-bottom: 10px;">
+                <span style="font-size: 28px;">🐱‍🏍️🎮</span>
+                <h3 style="margin:5px 0; color:#38bdf8;">Delhi Games Arena</h3>
+                <p style="font-size: 11px; color: #94a3b8; margin: 0;">Play, Win & Earn Real Rewards!</p>
+            </div>
+            <div class="lobby-grid">
+                <div class="lobby-card" onclick="loadGame('colourWin')">
+                    <span style="font-size: 28px;">🎨</span>
+                    <h4>Colour Win</h4>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">5s Fast Prediction</p>
+                </div>
+                <div class="lobby-card" onclick="loadGame('k3Dice')">
+                    <span style="font-size: 28px;">🎲</span>
+                    <h4>K3 Dice</h4>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Triple Dice Sum</p>
+                </div>
+                <div class="lobby-card" onclick="loadGame('chaarKhamba')">
+                    <span style="font-size: 28px;">🎲</span>
+                    <h4>Chaar Khamba</h4>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Token Strategy</p>
+                </div>
+                <div class="lobby-card" onclick="loadGame('rocket')">
+                    <span style="font-size: 28px;">🚀</span>
+                    <h4>Rocket High</h4>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Multiplier Crash</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function loadGame(type) {
+        const area = document.getElementById('gameArea');
+
+        if(type === 'colourWin') {
+            area.innerHTML = `
+                <div class="timer-box">
+                    <div>
+                        <div style="font-size: 11px; color: #94a3b8;">Period: 202610065S</div>
+                        <div style="font-weight: bold; font-size: 14px; color: #38bdf8;">🎨 Colour Win (5s Fast)</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #94a3b8;">Status</div>
+                        <div style="font-size: 15px; font-weight: bold; color: #22c55e;" id="fastStatus">Ready 🐱‍🏍️</div>
+                    </div>
+                </div>
+
+                <div class="color-btns">
+                    <button class="col-btn btn-green" onclick="placeFastBet('Green', 2)">Green (2x)</button>
+                    <button class="col-btn btn-violet" onclick="placeFastBet('Violet', 4.5)">Violet (4.5x)</button>
+                    <button class="col-btn btn-red" onclick="placeFastBet('Red', 2)">Red (2x)</button>
+                </div>
+
+                <div class="number-grid">
+                    <div class="num-ball" style="background:#dc2626;" onclick="placeFastNum(0)">0</div>
+                    <div class="num-ball" style="background:#16a34a;" onclick="placeFastNum(1)">1</div>
+                    <div class="num-ball" style="background:#dc2626;" onclick="placeFastNum(2)">2</div>
+                    <div class="num-ball" style="background:#16a34a;" onclick="placeFastNum(3)">3</div>
+                    <div class="num-ball" style="background:#9333ea;" onclick="placeFastNum(4)">4</div>
+                    <div class="num-ball" style="background:#9333ea;" onclick="placeFastNum(5)">5</div>
+                    <div class="num-ball" style="background:#dc2626;" onclick="placeFastNum(6)">6</div>
+                    <div class="num-ball" style="background:#16a34a;" onclick="placeFastNum(7)">7</div>
+                    <div class="num-ball" style="background:#dc2626;" onclick="placeFastNum(8)">8</div>
+                    <div class="num-ball" style="background:#16a34a;" onclick="placeFastNum(9)">9</div>
+                </div>
+
+                <div class="multiplier-bar">
+                    <div class="mult-btn active" id="m1" onclick="setMultiplier(1, this)">X1</div>
+                    <div class="mult-btn" id="m5" onclick="setMultiplier(5, this)">X5</div>
+                    <div class="mult-btn" id="m10" onclick="setMultiplier(10, this)">X10</div>
+                    <div class="mult-btn" id="m20" onclick="setMultiplier(20, this)">X20</div>
+                </div>
+
+                <div class="size-btns">
+                    <button class="size-btn btn-big" onclick="placeFastSize('Big')">Big (2x)</button>
+                    <button class="size-btn btn-small" onclick="placeFastSize('Small')">Small (2x)</button>
+                </div>
+
+                <div style="font-size: 12px; color: #94a3b8; font-weight: bold;">📊 History</div>
+                <div class="history-table" id="colourHistory">
+                    <div class="history-row"><span style="color: #64748b;">No recent rounds</span></div>
+                </div>
+            `;
+        } else if(type === 'k3Dice') {
+            area.innerHTML = `
+                <div class="timer-box" style="background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);">
+                    <div>
+                        <div style="font-size: 11px; color: #a7f3d0;">K3 5s Fast Dice</div>
+                        <div style="font-weight: bold; font-size: 14px; color: #fff;">🎲 Triple Dice Roll</div>
+                    </div>
+                    <div style="text-align: right;" id="diceStatus">
+                        <div style="font-size: 13px; font-weight: bold; color: #fcd34d;">Ready to Roll</div>
+                    </div>
+                </div>
+
+                <div style="text-align: center; background: #020617; padding: 12px; border-radius: 12px; border: 1px solid #1e293b; margin-bottom: 12px;">
+                    <span style="font-size: 28px;" id="diceIcon">🎲 🎲 🎲</span>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Sum Total Bet (3 to 18)</div>
+                </div>
+
+                <div class="size-btns">
+                    <button class="size-btn btn-big" onclick="playFastDice('Big')">Big Sum (2x)</button>
+                    <button class="size-btn btn-small" onclick="playFastDice('Small')">Small Sum (2x)</button>
+                </div>
+
+                <div class="color-btns">
+                    <button class="col-btn" style="background:#0284c7;" onclick="playFastDice('Even')">Even (2x)</button>
+                    <button class="col-btn" style="background:#d97706;" onclick="playFastDice('Odd')">Odd (2x)</button>
+                </div>
+
+                <div style="font-size: 12px; color: #94a3b8; font-weight: bold;">📊 K3 Dice History</div>
+                <div class="history-table" id="diceHistory">
+                    <div class="history-row"><span style="color: #64748b;">No dice rolls yet</span></div>
+                </div>
+            `;
+        } else if(type === 'chaarKhamba') {
+            area.innerHTML = `
+                <div style="text-align: center; padding: 15px; background: #020617; border-radius: 12px; border: 1px solid #1e293b;">
+                    <h3 style="margin:0; color: #f59e0b;">🎲 Chaar Khamba Board</h3>
+                    <p style="font-size: 13px; color: #94a3b8; margin: 8px 0;">Classic 4-Player Dice & Token Strategy Game</p>
+                    <div style="font-size: 40px; margin: 10px 0;">🎲 ⚂ ⚅</div>
+                    <button onclick="playChaarKhamba()" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 70%;">Roll Dice & Move 🎮</button>
+                </div>
+            `;
+        } else if(type === 'rocket') {
+            area.innerHTML = `
+                <h3 style="margin-top:0; color: #38bdf8;">🚀 Rocket Multiplier</h3>
+                <p style="font-size: 13px; color: #94a3b8;">Launch high and cash out before crash!</p>
+                <input type="number" id="rocketBet" value="50" min="10" style="width: 120px; text-align: center; display: inline-block;"> ₹<br>
+                <button onclick="playRocket()" style="background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); width: 70%; margin-top: 10px;">Launch Rocket 🚀</button>
+            `;
+        }
+    }
+
+    function setMultiplier(val, el) {
+        selectedMultiplier = val;
+        document.querySelectorAll('.mult-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function runFastCountdown(callback) {
+        let count = 5;
+        let statusEl = document.getElementById('fastStatus') || document.getElementById('diceStatus');
+        
+        let interval = setInterval(() => {
+            if(statusEl) statusEl.innerText = `Result in ${count}s...`;
+            count--;
+            if(count < 0) {
+                clearInterval(interval);
+                callback();
+            }
+        }, 1000);
+    }
+
+    function placeFastBet(choice, multiplier) {
+        let totalBet = 20 * selectedMultiplier;
+        if(currentUser.coins < totalBet) { alert('Insufficient balance!'); return; }
+
+        document.getElementById('fastStatus').innerText = 'Locking bets...';
+        runFastCountdown(() => {
+            let outcomes = ['Green', 'Red', 'Green', 'Violet', 'Red'];
+            let result = outcomes[Math.floor(Math.random() * outcomes.length)];
+
+            if(choice === result) {
+                let won = totalBet * multiplier;
+                modifyCoins(won - totalBet);
+                showPopup(true, "VICTORY! 🎉", `Outcome was ${result}!\nYou won +₹${won - totalBet} ✨`);
+            } else {
+                modifyCoins(-totalBet);
+                showPopup(false, "OOPS! 💔", `Outcome was ${result}!\nYou lost -₹${totalBet} 😢`);
+            }
+            addHistory(choice, result, totalBet);
+            document.getElementById('fastStatus').innerText = 'Ready';
+        });
+    }
+
+    function placeFastNum(num) {
+        let totalBet = 10 * selectedMultiplier;
+        if(currentUser.coins < totalBet) { alert('Insufficient balance!'); return; }
+
+        document.getElementById('fastStatus').innerText = 'Locking bets...';
+        runFastCountdown(() => {
+            let winningNum = Math.floor(Math.random() * 10);
+            if(num === winningNum) {
+                let won = totalBet * 9;
+                modifyCoins(won - totalBet);
+                showPopup(true, "JACKPOT! 🎯", `Winning number was ${winningNum}!\nWon +₹${won - totalBet} 🚀`);
+            } else {
+                modifyCoins(-totalBet);
+                showPopup(false, "MISSED! ❌", `Winning number was ${winningNum}!\nLost -₹${totalBet} 😔`);
+            }
+            addHistory(`Num ${num}`, `Num ${winningNum}`, totalBet);
+            document.getElementById('fastStatus').innerText = 'Ready';
+        });
+    }
+
+    function placeFastSize(size) {
+        let totalBet = 50 * selectedMultiplier;
+        if(currentUser.coins < totalBet) { alert('Insufficient balance!'); return; }
+
+        document.getElementById('fastStatus').innerText = 'Locking bets...';
+        runFastCountdown(() => {
+            let winningNum = Math.floor(Math.random() * 10);
+            let winningSize = winningNum >= 5 ? 'Big' : 'Small';
+
+            if(size === winningSize) {
+                modifyCoins(totalBet);
+                showPopup(true, "YOU WON! 🔥", `Result: ${winningNum} (${winningSize})\nWon +₹${totalBet}!`);
+            } else {
+                modifyCoins(-totalBet);
+                showPopup(false, "YOU LOST! 🌧️", `Result: ${winningNum} (${winningSize})\nLost -₹${totalBet}.`);
+            }
+            addHistory(size, `${winningNum} (${winningSize})`, totalBet);
+            document.getElementById('fastStatus').innerText = 'Ready';
+        });
+    }
+
+    function playFastDice(type) {
+        let bet = 50;
+        if(currentUser.coins < bet) { alert('Insufficient balance!'); return; }
+
+        document.getElementById('diceStatus').innerText = 'Rolling 5s...';
+        runFastCountdown(() => {
+            let d1 = Math.floor(Math.random() * 6) + 1;
+            let d2 = Math.floor(Math.random() * 6) + 1;
+            let d3 = Math.floor(Math.random() * 6) + 1;
+            let sum = d1 + d2 + d3;
+            let resSize = sum >= 11 ? 'Big' : 'Small';
+            let resOddEven = sum % 2 === 0 ? 'Even' : 'Odd';
+
+            if(type === resSize || type === resOddEven) {
+                modifyCoins(bet);
+                showPopup(true, "DICE WIN! 🎲", `Rolls: [${d1}, ${d2}, ${d3}] Sum: ${sum}\nWon +₹${bet}!`);
+            } else {
+                modifyCoins(-bet);
+                showPopup(false, "DICE LOSS! 💥", `Rolls: [${d1}, ${d2}, ${d3}] Sum: ${sum}\nLost -₹${bet}.`);
+            }
+
+            let html = `<div class="history-row"><span>Rolls: [${d1},${d2},${d3}]</span> <b>Sum: ${sum} (${resSize})</b></div>`;
+            let dHist = document.getElementById('diceHistory');
+            if(dHist) dHist.innerHTML = html + dHist.innerHTML;
+            document.getElementById('diceStatus').innerText = 'Ready to Roll';
+        });
+    }
+
+    function playChaarKhamba() {
+        let dice = Math.floor(Math.random() * 6) + 1;
+        if(dice >= 4) {
+            modifyCoins(150);
+            showPopup(true, "CHAAR KHAMBA WIN! 🎲", `Rolled ${dice}. Safe move! +₹150 ✨`);
+        } else {
+            modifyCoins(-50);
+            showPopup(false, "BLOCKED! 🛡️", `Rolled ${dice}. Token blocked! -₹50 ❌`);
+        }
+    }
+
+    function addHistory(pick, res, amt) {
+        gameHistoryList.unshift({ pick, res, amt });
+        if(gameHistoryList.length > 5) gameHistoryList.pop();
+
+        let html = '';
+        gameHistoryList.forEach(h => {
+            html += `<div class="history-row"><span><b>Pick:</b> ${h.pick}</span> <span><b>Res:</b> ${h.res}</span> <b style="color: #f59e0b;">Bet: ₹${h.amt}</b></div>`;
+        });
+        let histEl = document.getElementById('colourHistory');
+        if(histEl) histEl.innerHTML = html;
+    }
+
+    function playRocket() {
+        let bet = parseInt(document.getElementById('rocketBet').value) || 50;
+        if(currentUser.coins < bet) { alert('Not enough coins!'); return; }
+
+        let mult = (Math.random() * 3).toFixed(2);
+        if(mult > 1.2) {
+            let won = Math.floor(bet * mult);
+            modifyCoins(won - bet);
+            showPopup(true, "ROCKET SUCCESS! 🚀", `Hit ${mult}x multiplier!\nGained +₹${won - bet} 🌟`);
+        } else {
+            modifyCoins(-bet);
+            showPopup(false, "CRASHED! 💥", `Rocket crashed at ${mult}x!\nLost -₹${bet} 😢`);
+        }
+    }
+</script>
+
+</body>
+</html>
