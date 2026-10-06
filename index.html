@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delhi Games - WinGo</title>
+    <style>
+        body { background: #121212; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 480px; background: #1e1e1e; min-height: 100vh; padding: 15px; box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #2c2c2c; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 15px; overflow-x: auto; }
+        .tab { background: #333; border: none; color: #fff; padding: 8px 12px; border-radius: 5px; cursor: pointer; flex: 1; text-align: center; font-size: 11px; white-space: nowrap; }
+        .tab.active { background: #28a745; font-weight: bold; }
+        .timer-box { background: #2c2c2c; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border: 1px solid #444; }
+        .colors { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-color { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; color: #fff; cursor: pointer; font-size: 14px; }
+        .bg-green { background: #28a745; }
+        .bg-violet { background: #6f42c1; }
+        .bg-red { background: #dc3545; }
+        .numbers-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; }
+        .num-btn { aspect-ratio: 1; border-radius: 50%; border: none; font-size: 18px; font-weight: bold; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .size-btns { display: flex; gap: 15px; margin-bottom: 20px; }
+        .size-btn { flex: 1; padding: 16px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; color: #fff; cursor: pointer; text-transform: uppercase; }
+        .bg-big { background: #ffaa00; }
+        .bg-small { background: #007bff; }
+        .history { background: #2c2c2c; padding: 12px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h3 style="margin:0; font-size: 16px;">Delhi Games (WinGo)</h3>
+            <span id="balance" style="color: #28a745; font-weight: bold;">₹1,000.00</span>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active">WinGo 30s</button>
+            <button class="tab">WinGo 1Min</button>
+            <button class="tab">WinGo 3Min</button>
+            <button class="tab">WinGo 5Min</button>
+        </div>
+
+        <div class="timer-box">
+            <div>
+                <div style="font-size: 12px; color: #aaa;">Time Remaining</div>
+                <div id="timer" style="font-size: 26px; font-weight: bold; color: #ffaa00;">00:30</div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 11px; color: #aaa;">Period</div>
+                <div id="period" style="font-size: 13px; font-weight: bold;">202610070101</div>
+            </div>
+        </div>
+
+        <div class="colors">
+            <button class="btn-color bg-green" onclick="placeBet('Green')">Green</button>
+            <button class="btn-color bg-violet" onclick="placeBet('Violet')">Violet</button>
+            <button class="btn-color bg-red" onclick="placeBet('Red')">Red</button>
+        </div>
+
+        <div class="numbers-grid" id="numGrid"></div>
+
+        <div class="size-btns">
+            <button class="size-btn bg-big" onclick="placeBet('Big')">BIG</button>
+            <button class="size-btn bg-small" onclick="placeBet('Small')">SMALL</button>
+        </div>
+
+        <div class="history">
+            <h4 style="margin: 0 0 10px 0; font-size: 14px;">Game History</h4>
+            <table>
+                <thead>
+                    <tr><th>Period</th><th>Number</th><th>Type</th></tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr><td>202610070100</td><td>5</td><td>Big / Green</td></tr>
+                    <tr><td>202610070099</td><td>2</td><td>Small / Red</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('numGrid');
+        for(let i=0; i<=9; i++) {
+            let btn = document.createElement('button');
+            btn.className = 'num-btn';
+            btn.style.background = i===0 ? '#6f42c1' : (i%2===0 ? '#dc3545' : '#28a745');
+            btn.innerText = i;
+            btn.onclick = () => placeBet('Number ' + i);
+            grid.appendChild(btn);
+        }
+
+        let timeLeft = 30;
+        const timerEl = document.getElementById('timer');
+        setInterval(() => {
+            timeLeft--;
+            if(timeLeft < 0) timeLeft = 30;
+            timerEl.innerText = "00:" + (timeLeft < 10 ? "0" : "") + timeLeft;
+        }, 1000);
+
+        function placeBet(type) {
+            alert("Successfully placed bet on: " + type);
+        }
+    </script>
+</body>
+</html>
